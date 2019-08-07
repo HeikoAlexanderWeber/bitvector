@@ -1,3 +1,3 @@
-module github.com/HeikoAlexanderWeber/bitvector
+module github.com/HeikoAlexanderWeber/go-bitvector
 
 go 1.12
