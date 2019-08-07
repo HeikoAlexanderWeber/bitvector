@@ -4,40 +4,40 @@ import (
 	"errors"
 )
 
-// Component alias representing the most atomic block of information.
+// component alias representing the most atomic block of information.
 // Primarily used as definition of the scaling level (bit length) of the vector.
-type Component = byte
+type component = byte
 
 const (
-	maxComponent = 8                           // bit length of Component type
+	maxcomponent = 8                           // bit length of component type
 	maxSize      = int(int32(^uint32(0) >> 1)) // due to array indices etc.
 )
 
 // The Bitvector struct stores booleans optimized for storage space efficiently
-// inside it's fields. Instead of using large boolean types of 1 Component per boolean,
+// inside it's fields. Instead of using large boolean types of 1 component per boolean,
 // this type stores booleans as bits inside larger numbers.
-// Default scaling size is 8bit (uint8, Component).
+// Default scaling size is 8bit (uint8, component).
 type Bitvector struct {
 	occupied int
-	data     []Component
+	data     []component
 }
 
 // New func creates a new Bitvector and returns a reference to it.
 func New() *Bitvector {
 	return &Bitvector{
 		occupied: 0,
-		data:     []Component{},
+		data:     []component{},
 	}
 }
 
 func (v *Bitvector) ensureSize(count int) {
 	// optimization for clearing
 	if count == 0 {
-		v.data = []Component{}
+		v.data = []component{}
 		return
 	}
 	// calc dimensions
-	neededSize := (count-1)/maxComponent + 1
+	neededSize := (count-1)/maxcomponent + 1
 	actualSize := len(v.data)
 	remaining := neededSize - actualSize
 	if remaining == 0 { // both are the same
@@ -45,7 +45,7 @@ func (v *Bitvector) ensureSize(count int) {
 	}
 	if remaining > 0 { // need to grow
 		for i := 0; i < remaining; i++ {
-			v.data = append(v.data, Component(0))
+			v.data = append(v.data, component(0))
 		}
 	} else { // need to shrink
 		v.data = v.data[0 : len(v.data)+remaining]
@@ -53,10 +53,10 @@ func (v *Bitvector) ensureSize(count int) {
 }
 
 // calculate location
-func (v *Bitvector) location(count int) (int, Component) {
-	x := count / maxComponent
-	y := count % maxComponent
-	return x, Component(y)
+func (v *Bitvector) location(count int) (int, byte) {
+	x := count / maxcomponent
+	y := count % maxcomponent
+	return x, byte(y)
 }
 
 // Push func appends a boolean to the imaginary stack.

@@ -105,13 +105,7 @@ func TestGet(t *testing.T) {
 
 	b, err := v.Get(0, 1, 2)
 	raise(err)
-	if !b[0] {
-		t.Error(errors.New("received invalid data"))
-	}
-	if b[1] {
-		t.Error(errors.New("received invalid data"))
-	}
-	if !b[2] {
+	if !b[0] || b[1] || !b[2] {
 		t.Error(errors.New("received invalid data"))
 	}
 
