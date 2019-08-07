@@ -56,12 +56,12 @@ func TestPop(t *testing.T) {
 			v.Push(true)
 		}
 		for i := 0; i < c.nrOut; i++ {
-			b, err := v.Pop()
+			b, err := v.Pop(1)
 			if c.failsAt != i && err != nil {
 				t.Error(err)
 			} else if c.failsAt == i && err == nil {
 				t.Errorf("did not throw exception as expected by case %v", c)
-			} else if c.failsAt != i && !b {
+			} else if c.failsAt != i && !b[0] {
 				t.Error(errors.New("retrieved wrong value from pop"))
 			}
 		}
@@ -75,12 +75,55 @@ func TestPop(t *testing.T) {
 	}
 }
 
+func TestPopMany(t *testing.T) {
+	v := New()
+	expected := []bool{true, false, true, false, true, false, true, false, true}
+	v.Push(expected...)
+	arr, err := v.Pop(9)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(arr) != len(expected) {
+		t.Error(errors.New("array does not match expected array"))
+	}
+	for i, e := range expected {
+		if arr[i] != e {
+			t.Error(errors.New("array does not match expected array"))
+		}
+	}
+}
+
+func TestGet(t *testing.T) {
+	v := New()
+	v.Push(true, false, true)
+
+	raise := func(e error) {
+		if e != nil {
+			t.Error(e)
+		}
+	}
+
+	b, err := v.Get(0, 1, 2)
+	raise(err)
+	if !b[0] {
+		t.Error(errors.New("received invalid data"))
+	}
+	if b[1] {
+		t.Error(errors.New("received invalid data"))
+	}
+	if !b[2] {
+		t.Error(errors.New("received invalid data"))
+	}
+
+	b, err = v.Get(-1, 0)
+	if err == nil {
+		t.Error(errors.New("did not return expected error for invalid index"))
+	}
+}
+
 func TestSet(t *testing.T) {
 	v := New()
-	v.Push(false)
-	v.Push(false)
-	v.Push(false)
-	v.Push(false)
+	v.Push(false, false, false, false)
 	v.Set(2, true)
 
 	if v.occupied != 4 || len(v.data) != 1 {
@@ -101,22 +144,20 @@ func TestSet(t *testing.T) {
 	if v.data[0] != 11 { // 11010000
 		t.Error(errors.New("unexpeted state"))
 	}
+
+	if v.Set(-1, false) == nil {
+		t.Error(errors.New("did not return expected invalid index error"))
+	}
 }
 
 func TestAsArray(t *testing.T) {
 	v := New()
-	v.Push(true)
-	v.Push(false)
-	v.Push(true)
-	v.Push(false)
-	v.Push(true)
-	v.Push(false)
-	v.Push(true)
-	v.Push(false)
-	v.Push(true)
-
-	arr := v.AsArray()
+	if len(v.AsArray()) != 0 {
+		t.Error(errors.New("empty array expected"))
+	}
 	expected := []bool{true, false, true, false, true, false, true, false, true}
+	v.Push(expected...)
+	arr := v.AsArray()
 	if len(arr) != len(expected) {
 		t.Error(errors.New("array does not match expected array"))
 	}

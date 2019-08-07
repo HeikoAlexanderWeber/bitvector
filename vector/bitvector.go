@@ -1,32 +1,42 @@
 package vector
 
-import "errors"
-
-const (
-	maxComponent = 8 // bit length of byte
-	maxSize      = ^int(0)
+import (
+	"errors"
 )
 
-// Bitvector struct
+// Component alias representing the most atomic block of information.
+// Primarily used as definition of the scaling level (bit length) of the vector.
+type Component = byte
+
+const (
+	maxComponent = 8                           // bit length of Component type
+	maxSize      = int(int32(^uint32(0) >> 1)) // due to array indices etc.
+)
+
+// The Bitvector struct stores booleans optimized for storage space efficiently
+// inside it's fields. Instead of using large boolean types of 1 Component per boolean,
+// this type stores booleans as bits inside larger numbers.
+// Default scaling size is 8bit (uint8, Component).
 type Bitvector struct {
 	occupied int
-	data     []byte
+	data     []Component
 }
 
-// New func
+// New func creates a new Bitvector and returns a reference to it.
 func New() *Bitvector {
 	return &Bitvector{
 		occupied: 0,
-		data:     []byte{},
+		data:     []Component{},
 	}
 }
 
 func (v *Bitvector) ensureSize(count int) {
 	// optimization for clearing
 	if count == 0 {
-		v.data = []byte{}
+		v.data = []Component{}
 		return
 	}
+	// calc dimensions
 	neededSize := (count-1)/maxComponent + 1
 	actualSize := len(v.data)
 	remaining := neededSize - actualSize
@@ -35,48 +45,72 @@ func (v *Bitvector) ensureSize(count int) {
 	}
 	if remaining > 0 { // need to grow
 		for i := 0; i < remaining; i++ {
-			v.data = append(v.data, byte(0))
+			v.data = append(v.data, Component(0))
 		}
 	} else { // need to shrink
 		v.data = v.data[0 : len(v.data)+remaining]
 	}
 }
 
-func (v *Bitvector) location(count int) (int, byte) {
+// calculate location
+func (v *Bitvector) location(count int) (int, Component) {
 	x := count / maxComponent
 	y := count % maxComponent
-	return x, byte(y)
+	return x, Component(y)
 }
 
-// Push func
-func (v *Bitvector) Push(val bool) error {
-	if v.occupied == maxSize {
-		return errors.New("maximum size exceeded")
+// Push func appends a boolean to the imaginary stack.
+// This method returns an error if the imaginary stack would exceeded
+// its maximum size.
+func (v *Bitvector) Push(val ...bool) error {
+	if v.occupied+len(val) > maxSize {
+		return errors.New("can not push, maximum size would be exceeded")
 	}
-	v.ensureSize(v.occupied + 1)
-	x, y := v.location(v.occupied)
-	if val {
-		v.data[x] |= (1 << y)
+	v.ensureSize(v.occupied + len(val))
+	for _, b := range val {
+		x, y := v.location(v.occupied)
+		if b {
+			v.data[x] |= (1 << y)
+		}
+		v.occupied++
 	}
-	v.occupied++
 	return nil
 }
 
-// Pop func
-func (v *Bitvector) Pop() (bool, error) {
-	if v.occupied <= 0 {
-		return false, errors.New("vector is empty")
+// Pop func removes the last n items from the imaginary stack.
+// This method returns an error if the amount of requested items exceeds the imaginary stack size.
+func (v *Bitvector) Pop(n int) ([]bool, error) {
+	if n > v.occupied {
+		return nil, errors.New("can not pop, too many items requested")
 	}
-	x, y := v.location(v.occupied - 1)
-	value := (v.data[x] >> y) > 0
-	v.data[x] &= ^(1 << y)
+	vals := []bool{}
+	for i := 0; i < n; i++ {
+		x, y := v.location(v.occupied - 1)
+		vals = append(vals, (v.data[x]>>y) > 0)
+		v.data[x] &= ^(1 << y)
 
-	v.ensureSize(v.occupied - 1)
-	v.occupied--
-	return value, nil
+		v.ensureSize(v.occupied - 1)
+		v.occupied--
+	}
+	return vals, nil
 }
 
-// Set func
+// Get func gets a specified boolean at the given index.
+// This method returns an error if the index is invalid.
+func (v *Bitvector) Get(index ...int) ([]bool, error) {
+	vals := []bool{}
+	for _, i := range index {
+		if i < 0 || i >= v.occupied {
+			return nil, errors.New("invalid index")
+		}
+		x, y := v.location(i)
+		vals = append(vals, (v.data[x]&(1<<y)) > 0)
+	}
+	return vals, nil
+}
+
+// Set func sets a specific index in the imaginary stack to the given value.
+// This method returns an error if the index is invalid.
 func (v *Bitvector) Set(index int, val bool) error {
 	if index < 0 || index >= v.occupied {
 		return errors.New("invalid index")
@@ -90,24 +124,18 @@ func (v *Bitvector) Set(index int, val bool) error {
 	return nil
 }
 
-// Clear func
+// Clear func clears all data and resets the instance to an empty state.
 func (v *Bitvector) Clear() {
 	v.occupied = 0
 	v.ensureSize(0)
 }
 
-// AsArray func
+// AsArray func returns an array representation of the current state.
 func (v *Bitvector) AsArray() []bool {
 	result := []bool{}
-	cnt := 0
-	for _, x := range v.data {
-		for y := byte(0); y < maxComponent; y++ {
-			cnt++
-			if cnt > v.occupied {
-				return result
-			}
-			result = append(result, (x&(1<<y)) > 0)
-		}
+	for i := 0; i < v.occupied; i++ {
+		x, y := v.location(i)
+		result = append(result, (v.data[x]&(1<<y)) > 0)
 	}
 	return result
 }
