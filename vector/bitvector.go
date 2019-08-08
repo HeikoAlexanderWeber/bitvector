@@ -48,7 +48,7 @@ func (v *Bitvector) resize(count int) {
 			v.data = append(v.data, component(0))
 		}
 	} else { // need to shrink
-		v.data = v.data[0 : len(v.data)+remaining]
+		v.data = v.data[0 : actualSize+remaining] // remaining is negative
 	}
 }
 
