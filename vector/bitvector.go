@@ -30,7 +30,7 @@ func New() *Bitvector {
 	}
 }
 
-func (v *Bitvector) ensureSize(count int) {
+func (v *Bitvector) resize(count int) {
 	// optimization for clearing
 	if count == 0 {
 		v.data = []component{}
@@ -66,7 +66,7 @@ func (v *Bitvector) Push(val ...bool) error {
 	if v.occupied+len(val) > maxSize {
 		return errors.New("can not push, maximum size would be exceeded")
 	}
-	v.ensureSize(v.occupied + len(val))
+	v.resize(v.occupied + len(val))
 	for _, b := range val {
 		x, y := v.location(v.occupied)
 		if b {
@@ -89,7 +89,7 @@ func (v *Bitvector) Pop(n int) ([]bool, error) {
 		vals = append(vals, (v.data[x]>>y) > 0)
 		v.data[x] &= ^(1 << y)
 
-		v.ensureSize(v.occupied - 1)
+		v.resize(v.occupied - 1)
 		v.occupied--
 	}
 	return vals, nil
@@ -127,7 +127,7 @@ func (v *Bitvector) Set(index int, val bool) error {
 // Clear func clears all data and resets the instance to an empty state.
 func (v *Bitvector) Clear() {
 	v.occupied = 0
-	v.ensureSize(0)
+	v.resize(0)
 }
 
 // AsArray func returns an array representation of the current state.
