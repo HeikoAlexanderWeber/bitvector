@@ -32,7 +32,7 @@ func New() *Bitvector {
 
 func (v *Bitvector) resize(count int) {
 	// optimization for clearing
-	if count == 0 {
+	if count <= 0 {
 		v.data = []component{}
 		return
 	}
