@@ -9,8 +9,7 @@ import (
 type component = byte
 
 const (
-	maxcomponent = 8                           // bit length of component type
-	maxSize      = int(int32(^uint32(0) >> 1)) // due to array indices etc.
+	maxcomponent = 8 // bit length of component type
 )
 
 // The Bitvector struct stores booleans optimized for storage space efficiently
@@ -63,9 +62,6 @@ func (v *Bitvector) location(count int) (int, byte) {
 // This method returns an error if the imaginary stack would exceeded
 // its maximum size.
 func (v *Bitvector) Push(val ...bool) error {
-	if v.occupied+len(val) > maxSize {
-		return errors.New("can not push, maximum size would be exceeded")
-	}
 	v.resize(v.occupied + len(val))
 	for _, b := range val {
 		x, y := v.location(v.occupied)
