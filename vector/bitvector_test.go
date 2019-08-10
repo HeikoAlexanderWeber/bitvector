@@ -77,9 +77,9 @@ func TestPop(t *testing.T) {
 
 func TestPopMany(t *testing.T) {
 	v := New()
-	expected := []bool{true, false, true, false, true, false, true, false, true}
+	expected := []bool{true, false, true, false, true, false, true, false, true, false}
 	v.Push(expected...)
-	arr, err := v.Pop(9)
+	arr, err := v.Pop(10)
 	if err != nil {
 		t.Error(err)
 	}
