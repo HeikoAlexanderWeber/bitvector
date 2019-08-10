@@ -76,18 +76,18 @@ func (v *Bitvector) Push(val ...bool) error {
 // Pop func removes the last n items from the imaginary stack.
 // This method returns an error if the amount of requested items exceeds the imaginary stack size.
 func (v *Bitvector) Pop(n int) ([]bool, error) {
-	if n > v.occupied {
+	if n < 0 || n > v.occupied {
 		return nil, errors.New("can not pop, too many items requested")
 	}
 	vals := []bool{}
-	for i := 0; i < n; i++ {
-		x, y := v.location(v.occupied - 1)
-		vals = append(vals, (v.data[x]>>y) > 0)
-		v.data[x] &= ^(1 << y)
-
-		v.resize(v.occupied - 1)
-		v.occupied--
+	i := 0
+	for i < n {
+		x, y := v.location(i)
+		vals = append(vals, (v.data[x]&(1<<y)) > 0)
+		i++
 	}
+	v.resize(v.occupied - n)
+	v.occupied -= n
 	return vals, nil
 }
 
