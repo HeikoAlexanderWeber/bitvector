@@ -81,8 +81,9 @@ func (v *Bitvector) Pop(n int) ([]bool, error) {
 	}
 	vals := []bool{}
 	i := 0
+	start := v.occupied - n
 	for i < n {
-		x, y := v.location(i)
+		x, y := v.location(start + i)
 		vals = append(vals, (v.data[x]&(1<<y)) > 0)
 		i++
 	}
