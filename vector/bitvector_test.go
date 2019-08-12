@@ -94,6 +94,116 @@ func TestPopMany(t *testing.T) {
 	}
 }
 
+func TestPopOne(t *testing.T) {
+	v := New()
+	d, e := v.PopOne()
+	if d || e == nil {
+		t.Error(errors.New("did not throw expected error"))
+	}
+	v.Push(false, true)
+	d, e = v.PopOne()
+	if e != nil {
+		t.Error(e)
+	}
+	if !d {
+		t.Error(errors.New("received wrong data"))
+	}
+	d, e = v.PopOne()
+	if e != nil {
+		t.Error(e)
+	}
+	if d {
+		t.Error(errors.New("received wrong data"))
+	}
+}
+
+func TestInsert(t *testing.T) {
+	v := New()
+	if v.Insert(0, true) == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
+	v.Push(false, false)
+	if v.Insert(-1, true) == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
+	if v.Insert(3, true) == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
+
+	if e := v.Insert(1, true, true); e != nil {
+		t.Error(e)
+	}
+	expected := []bool{false, true, true, false}
+	arr := v.AsArray()
+	if len(arr) != len(expected) {
+		t.Error(errors.New("array does not match expected array"))
+	}
+	for i, e := range expected {
+		if arr[i] != e {
+			t.Error(errors.New("array does not match expected array"))
+		}
+	}
+}
+
+func TestDelete(t *testing.T) {
+	v := New()
+	if v.Delete(-1) == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
+	v.Push(false, true, true, false, true)
+	if v.Delete(10) == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
+	if e := v.Delete(1, 2); e != nil {
+		t.Error(e)
+	}
+	if e := v.Delete(2); e != nil {
+		t.Error(e)
+	}
+	// make sure that one invalid index results in the vector not being modified at all
+	if v.Delete(0, 5) == nil { // 5 is invalid
+		t.Error(errors.New("did not return expected error"))
+	}
+
+	expected := []bool{false, false}
+	arr := v.AsArray()
+	if len(arr) != len(expected) {
+		t.Error(errors.New("array does not match expected array"))
+	}
+	for i, e := range expected {
+		if arr[i] != e {
+			t.Error(errors.New("array does not match expected array"))
+		}
+	}
+}
+
+func TestDeleteRange(t *testing.T) {
+	v := New()
+	if v.DeleteRange(0, 1) == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
+	v.Push(false, true, true, false, true)
+	if v.Delete(0, 6) == nil { // 6 is invalid
+		t.Error(errors.New("did not return expected error"))
+	}
+	if e := v.DeleteRange(1, 2); e != nil {
+		t.Error(e)
+	}
+	if e := v.DeleteRange(2, 1); e != nil {
+		t.Error(e)
+	}
+	expected := []bool{false, false}
+	arr := v.AsArray()
+	if len(arr) != len(expected) {
+		t.Error(errors.New("array does not match expected array"))
+	}
+	for i, e := range expected {
+		if arr[i] != e {
+			t.Error(errors.New("array does not match expected array"))
+		}
+	}
+}
+
 func TestGet(t *testing.T) {
 	v := New()
 	v.Push(true, false, true)
@@ -113,6 +223,31 @@ func TestGet(t *testing.T) {
 	b, err = v.Get(-1, 0)
 	if err == nil {
 		t.Error(errors.New("did not return expected error for invalid index"))
+	}
+}
+
+func TestGetOne(t *testing.T) {
+	v := New()
+	if d, e := v.GetOne(0); d || e == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
+	v.Push(false, true)
+	if d, e := v.GetOne(2); d || e == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
+	d, e := v.GetOne(1)
+	if e != nil {
+		t.Error(e)
+	}
+	if !d {
+		t.Error(errors.New("received wrong data"))
+	}
+	d, e = v.GetOne(0)
+	if e != nil {
+		t.Error(e)
+	}
+	if d {
+		t.Error(errors.New("received wrong data"))
 	}
 }
 
@@ -171,5 +306,27 @@ func TestClear(t *testing.T) {
 	v.Clear()
 	if len(v.data) > 0 || v.occupied > 0 {
 		t.Error(errors.New("unexpected size"))
+	}
+}
+
+func TestLength(t *testing.T) {
+	v := New()
+	if v.Length() != 0 {
+		t.Error(errors.New("returned wrong length"))
+	}
+	v.Push(true, false, true)
+	if v.Length() != 3 {
+		t.Error(errors.New("returned wrong length"))
+	}
+}
+
+func TestSize(t *testing.T) {
+	v := New()
+	if v.Size() != 0 {
+		t.Error(errors.New("returned wrong size"))
+	}
+	v.Push(true, false, true, false, true, false, true, false, true)
+	if v.Size() != 2 {
+		t.Error(errors.New("returned wrong size"))
 	}
 }

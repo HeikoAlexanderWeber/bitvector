@@ -79,17 +79,87 @@ func (v *Bitvector) Pop(n int) ([]bool, error) {
 	if n < 0 || n > v.occupied {
 		return nil, errors.New("can not pop, too many items requested")
 	}
-	vals := []bool{}
+
+	indices := []int{}
 	i := 0
 	start := v.occupied - n
 	for i < n {
-		x, y := v.location(start + i)
-		vals = append(vals, (v.data[x]&(1<<y)) > 0)
+		indices = append(indices, start+i)
 		i++
 	}
+	data, err := v.Get(indices...)
+
 	v.resize(v.occupied - n)
 	v.occupied -= n
-	return vals, nil
+
+	return data, err
+}
+
+// PopOne is a convenience wrapper-function of Pop() to only pop one item.
+func (v *Bitvector) PopOne() (bool, error) {
+	d, e := v.Pop(1)
+	if e != nil {
+		return false, e
+	}
+	return d[0], e
+}
+
+// Insert func inserts the given data into the storage at a given index.
+// It returns an error if the index is invalid.
+func (v *Bitvector) Insert(index int, vals ...bool) error {
+	if index < 0 || index > v.occupied-1 {
+		return errors.New("can not insert, invalid index was provided")
+	}
+
+	v.resize(v.occupied + len(vals))
+	v.occupied += len(vals)
+
+	offset := 0
+	for offset < len(vals) {
+		oldV, _ := v.Get(index + offset)
+		v.Set(index+offset, vals[offset])
+		v.Set(index+offset+len(vals), oldV[0])
+		offset++
+	}
+
+	return nil
+}
+
+// Delete func deletes all elements with the given indices. Returns error
+// if an index is invalid.
+func (v *Bitvector) Delete(indices ...int) error {
+	for _, i := range indices {
+		if i < 0 || i > v.occupied {
+			return errors.New("can not delete, invalid index was provided")
+		}
+	}
+	deletedItems := 0
+	for _, i := range indices {
+		realIndex := i - deletedItems
+		for realIndex < v.occupied-1 {
+			next, _ := v.Get(realIndex + 1)
+			v.Set(realIndex, next[0])
+			realIndex++
+		}
+		deletedItems++
+	}
+	v.resize(v.occupied - len(indices))
+	v.occupied -= len(indices)
+	return nil
+}
+
+// DeleteRange func for convenience. This method deletes chunks of data.
+// The first element to be deleted is at the given index. Every item in the range of
+// [index, count) is deleted.
+func (v *Bitvector) DeleteRange(index int, count int) error {
+	if index < 0 || index+count > v.occupied {
+		return errors.New("can not delete range, invalid index was provided")
+	}
+	indices := []int{}
+	for i := index; i < index+count; i++ {
+		indices = append(indices, i)
+	}
+	return v.Delete(indices...)
 }
 
 // Get func gets a specified boolean at the given index.
@@ -104,6 +174,15 @@ func (v *Bitvector) Get(index ...int) ([]bool, error) {
 		vals = append(vals, (v.data[x]&(1<<y)) > 0)
 	}
 	return vals, nil
+}
+
+// GetOne func is a convenience wrapper-function for Get() to only retrieve one item.
+func (v *Bitvector) GetOne(index int) (bool, error) {
+	d, e := v.Get(index)
+	if e != nil {
+		return false, e
+	}
+	return d[0], e
 }
 
 // Set func sets a specific index in the imaginary stack to the given value.
@@ -135,4 +214,15 @@ func (v *Bitvector) AsArray() []bool {
 		result = append(result, (v.data[x]&(1<<y)) > 0)
 	}
 	return result
+}
+
+// Length func returns the amount of occupied bits / the amount of booleans stored.
+func (v *Bitvector) Length() int {
+	return v.occupied
+}
+
+// Size func returns the byte-size of the storage. This method only takes the storage
+// itself into account. The constant overhead of the fields of this type are ignored.
+func (v *Bitvector) Size() int {
+	return len(v.data) * maxcomponent / 8 // from bit to byte
 }
