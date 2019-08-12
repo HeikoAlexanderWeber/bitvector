@@ -3,6 +3,7 @@
 [![LICENSE](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 [![Build Status](https://travis-ci.com/HeikoAlexanderWeber/go-bitvector.svg?token=jLWKSu6GaoZv38y9JzqL&branch=master)](https://travis-ci.com/HeikoAlexanderWeber/go-bitvector)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/c6a5c39e7bd042389370b22a3c98959f)](https://www.codacy.com/app/HeikoAlexanderWeber/go-bitvector?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=HeikoAlexanderWeber/go-bitvector&amp;utm_campaign=Badge_Grade)
+[![Sourcegraph Badge](https://sourcegraph.com/github.com/HeikoAlexanderWeber/go-bitvector/-/badge.svg)](https://sourcegraph.com/github.com/HeikoAlexanderWeber/go-bitvector?badge)
 
 ## Stats
 
