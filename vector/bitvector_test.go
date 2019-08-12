@@ -96,8 +96,12 @@ func TestPopMany(t *testing.T) {
 
 func TestPopOne(t *testing.T) {
 	v := New()
-	v.Push(false, true)
 	d, e := v.PopOne()
+	if d || e == nil {
+		t.Error(errors.New("did not throw expected error"))
+	}
+	v.Push(false, true)
+	d, e = v.PopOne()
 	if e != nil {
 		t.Error(e)
 	}
@@ -115,7 +119,17 @@ func TestPopOne(t *testing.T) {
 
 func TestInsert(t *testing.T) {
 	v := New()
+	if v.Insert(0, true) == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
 	v.Push(false, false)
+	if v.Insert(-1, true) == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
+	if v.Insert(3, true) == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
+
 	if e := v.Insert(1, true, true); e != nil {
 		t.Error(e)
 	}
@@ -133,13 +147,24 @@ func TestInsert(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	v := New()
+	if v.Delete(-1) == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
 	v.Push(false, true, true, false, true)
+	if v.Delete(10) == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
 	if e := v.Delete(1, 2); e != nil {
 		t.Error(e)
 	}
 	if e := v.Delete(2); e != nil {
 		t.Error(e)
 	}
+	// make sure that one invalid index results in the vector not being modified at all
+	if v.Delete(0, 5) == nil { // 5 is invalid
+		t.Error(errors.New("did not return expected error"))
+	}
+
 	expected := []bool{false, false}
 	arr := v.AsArray()
 	if len(arr) != len(expected) {
@@ -154,7 +179,13 @@ func TestDelete(t *testing.T) {
 
 func TestDeleteRange(t *testing.T) {
 	v := New()
+	if v.DeleteRange(0, 1) == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
 	v.Push(false, true, true, false, true)
+	if v.Delete(0, 6) == nil { // 6 is invalid
+		t.Error(errors.New("did not return expected error"))
+	}
 	if e := v.DeleteRange(1, 2); e != nil {
 		t.Error(e)
 	}
@@ -197,7 +228,13 @@ func TestGet(t *testing.T) {
 
 func TestGetOne(t *testing.T) {
 	v := New()
+	if d, e := v.GetOne(0); d || e == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
 	v.Push(false, true)
+	if d, e := v.GetOne(2); d || e == nil {
+		t.Error(errors.New("did not return expected error"))
+	}
 	d, e := v.GetOne(1)
 	if e != nil {
 		t.Error(e)

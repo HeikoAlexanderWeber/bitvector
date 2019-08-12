@@ -107,7 +107,7 @@ func (v *Bitvector) PopOne() (bool, error) {
 // Insert func inserts the given data into the storage at a given index.
 // It returns an error if the index is invalid.
 func (v *Bitvector) Insert(index int, vals ...bool) error {
-	if index < 0 || index > v.occupied {
+	if index < 0 || index > v.occupied-1 {
 		return errors.New("can not insert, invalid index was provided")
 	}
 
@@ -130,7 +130,7 @@ func (v *Bitvector) Insert(index int, vals ...bool) error {
 func (v *Bitvector) Delete(indices ...int) error {
 	for _, i := range indices {
 		if i < 0 || i > v.occupied {
-			return errors.New("can not insert, invalid index was provided")
+			return errors.New("can not delete, invalid index was provided")
 		}
 	}
 	deletedItems := 0
@@ -153,7 +153,7 @@ func (v *Bitvector) Delete(indices ...int) error {
 // [index, count) is deleted.
 func (v *Bitvector) DeleteRange(index int, count int) error {
 	if index < 0 || index+count > v.occupied {
-		return errors.New("can not insert, invalid index was provided")
+		return errors.New("can not delete range, invalid index was provided")
 	}
 	indices := []int{}
 	for i := index; i < index+count; i++ {
