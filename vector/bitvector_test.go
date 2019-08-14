@@ -5,6 +5,10 @@ import (
 	"testing"
 )
 
+// =====
+// Tests
+// =====
+
 var casesTestPush = []struct {
 	nr   int
 	size int
@@ -329,4 +333,199 @@ func TestSize(t *testing.T) {
 	if v.Size() != 2 {
 		t.Error(errors.New("returned wrong size"))
 	}
+}
+
+// ==========
+// Benchmarks
+// ==========
+
+func BenchmarkNew(b *testing.B) {
+	x := New()
+	for n := 0; n < b.N; n++ {
+		x = New()
+	}
+	x.Length()
+	b.ReportAllocs()
+}
+
+func BenchmarkPush(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Push(true)
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkPop(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Push(true)
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		v.Pop(1)
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkPopOne(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Push(true)
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		v.PopOne()
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkInsertFront(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Insert(0, true)
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkInsertTail(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Insert(n, true)
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkDeleteFront(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Push(true)
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		v.Delete(0)
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkDeleteTail(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Push(true)
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		v.Delete(b.N - n - 1)
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkDeleteRangeFront(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Push(true)
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		v.DeleteRange(0, 1)
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkDeleteRangeTail(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Push(true)
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		v.DeleteRange(0, 1)
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkGet(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Push(true)
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		v.Get(n)
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkGetOne(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Push(true)
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		v.GetOne(n)
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkSet(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Push(true)
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		v.Set(n, false)
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkClear(b *testing.B) {
+	vecs := []*Bitvector{}
+	for n := 0; n < b.N; n++ {
+		v := New()
+		v.Push(true, true, true, true)
+		vecs = append(vecs, v)
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		vecs[n].Clear()
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkAsArray(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Push(true, true, true, true)
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		v.AsArray()
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkLength(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Push(true)
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		v.Length()
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkSize(b *testing.B) {
+	v := New()
+	for n := 0; n < b.N; n++ {
+		v.Push(true)
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		v.Size()
+	}
+	b.ReportAllocs()
 }
