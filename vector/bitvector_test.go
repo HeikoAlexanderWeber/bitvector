@@ -439,7 +439,7 @@ func BenchmarkDeleteRangeTail(b *testing.B) {
 	}
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		v.DeleteRange(0, 1)
+		v.DeleteRange(n, 1)
 	}
 	b.ReportAllocs()
 }
