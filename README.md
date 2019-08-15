@@ -31,6 +31,7 @@ For setting up the environment, just call `sh scripts/setup.sh`.
 * `make install` for downloading dependencies (done in `setup.sh`)
 * `make format` for formatting the code using `gofmt`
 * `make test` for executing unit tests
+* `make bench` for executing benchmarks and reports
 * `make cover` for generating an interactive coverage report
 
 ## Dependencies
