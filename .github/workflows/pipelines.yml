@@ -2,7 +2,7 @@ name: Test & Scan
 on: [push]
 
 jobs:
-  test&scan:
+  test_and_scan:
     name: Test & Scan
     runs-on: ubuntu-latest
     steps:
