@@ -1,4 +1,4 @@
-name: Build & Scan
+name: Test & Scan
 on: [push]
 
 jobs:
