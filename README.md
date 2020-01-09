@@ -20,7 +20,7 @@
 
 ## Prerequisites
 
-* `Go` >= 1.12.x
+* `Go` >= 1.13.x
 
 ## Getting started
 
